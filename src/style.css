@@ -1,7 +1,12 @@
-#app {
+html,
+body {
   height: 100vh;
-  display: grid;
-  grid-template-areas:
-    header
-    main;
+}
+
+#app {
+  width: 100%;
+  max-width: 768px;
+  margin: auto;
+  padding: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.3);
 }
