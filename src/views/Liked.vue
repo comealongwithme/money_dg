@@ -1,6 +1,6 @@
 <template>
   <JokesList :jokes="jokes" @like="like" v-if="jokes.length > 0" />
-  <p v-else>You didn't like any joke!</p>
+  <div v-else>You didn't like any joke!</div>
 </template>
 
 <script>
