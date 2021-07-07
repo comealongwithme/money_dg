@@ -12,13 +12,16 @@ export default {
   components: { JokesList },
   setup() {
     const store = useStore();
-    const jokes = computed(() =>
-      store.state.jokes.filter((item) => item.like == true)
-    );
+    const jokes = computed(() => store.state.likedJokes);
     const like = (id) => {
       for (let joke of jokes.value) {
         if (joke.id == id) {
           joke.like = !joke.like;
+          if (joke.like) {
+            store.commit('addLikedJokes', { data: joke });
+          } else {
+            store.commit('removeLikedJokes', { data: joke.id });
+          }
         }
       }
     };

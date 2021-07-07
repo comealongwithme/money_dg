@@ -2,6 +2,7 @@
   <input
     type="text"
     placeholder="Search..."
+    class="search"
     name="search"
     v-model="inputValue"
     @input="search"
@@ -35,8 +36,6 @@ export default {
       };
     }
 
-    const search = debounce(function () {}, 600);
-
     const generateUrl = (apiUrl) => {
       return (params) => {
         return `${apiUrl}${params}`;
@@ -46,19 +45,17 @@ export default {
     const generateParams = (params) => {
       let output = '';
       for (let key in params) {
-        output += `?${key}=${params[key]}`;
+        output += `&${key}=${params[key]}`;
       }
-      return output;
+      return '?' + output;
     };
 
     const apiUrl = generateUrl(`https://v2.jokeapi.dev/joke/Any`)(
-      generateParams({ amount: 10 })
+      generateParams({ amount: 10, type: 'single' })
     );
 
-    // var jokes = ref(null);
-
     const store = useStore();
-    const jokes = computed(() => store.state.jokes);
+    var jokes = computed(() => store.state.jokes);
 
     onMounted(() => {
       if (jokes.value.length <= 0) {
@@ -70,10 +67,28 @@ export default {
       }
     });
 
+    // watchEffect(() => console.log(jokes));
+
+    const search = debounce(function () {
+      // jokes.value.filter((joke) => joke.joke.includes(inputValue.value))
+      fetch(apiUrl + `&contains=${inputValue.value}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data && data.jokes.length > 0) {
+            store.commit('setJokes', { data: data.jokes });
+          }
+        });
+    }, 600);
+
     const like = (id) => {
       for (let joke of jokes.value) {
         if (joke.id == id) {
           joke.like = !joke.like;
+          if (joke.like) {
+            store.commit('addLikedJokes', { data: joke });
+          } else {
+            store.commit('removeLikedJokes', { data: joke.id });
+          }
         }
       }
     };
@@ -83,4 +98,17 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.search {
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0.25rem 0 rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(0.125rem);
+}
+.search:focus {
+  outline-color: #5cdb95;
+}
+</style>
